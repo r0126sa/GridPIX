@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>画像編集ツール</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
+</head>
+
+<body>
+  <header>
+    <img src="photo/icon.svg" alt="GridPIX" class="icon"/>
+    <div id="hamburger" aria-label="メニューを開く" aria-expanded="false" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav id="navMenu" aria-label="メインメニュー">
+      <button id="closeBtn" aria-label="メニューを閉じる">&times;</button>
+      <a href="pages/grid.html">画像分割</a>
+      <a href="pages/select.html">複数範囲選択</a>
+      <a href="pages/filter.html">フィルタ適用</a>
+    </nav>
+  </header>
+
+  <main>
+    <p class="title">ツールを選択する</p>
+    <div class="menu-group">
+        <a href="pages/grid.html" class="grid">
+            <img src="photo/GRID.svg" alt="GRID" width="300px">
+        </a>
+        <a href="pages/select.html" class="select">
+            <img src="photo/SERECT.svg" alt="SERECT" width="300px">
+        </a>
+        <a href="pages/filter.html" class="filter">
+            <img src="photo/FILTER.svg" alt="FILTER" width="300px">
+        </a>
+    </div>
+    </section>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('navMenu');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function toggleMenu() {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+      hamburger.setAttribute('aria-expanded', !expanded);
+      hamburger.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    hamburger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>フィルタ適用ツール</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
+</head>
+
+<body>
+  <header>
+    <a href="../home.html">
+      <img src="../photo/icon.svg" alt="GridPIX" class="icon" />
+    </a>
+    <div id="hamburger" aria-label="メニューを開く" aria-expanded="false" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav id="navMenu" aria-label="メインメニュー">
+      <button id="closeBtn" aria-label="メニューを閉じる">&times;</button>
+      <a href="../pages/grid.html">画像分割</a>
+      <a href="../pages/select.html">複数範囲選択</a>
+      <a href="#">フィルタ適用</a>
+    </nav>
+  </header>
+
+  <p class="title">フィルタ適用ツール</p>
+
+  <!-- 画像選択エリア -->
+  <div class="inputBox" id="inputArea">
+    <label for="imageInput" class="file-label">
+      <img src="../photo/inputbutton.png" alt="画像を選択" />
+    </label>
+    <input type="file" id="imageInput" accept="image/*">
+    <p>1枚の画像を選択する.</p>
+  </div>
+
+  <!-- プレビューとフィルタ -->
+  <div class="wrapper-box" style="display: none;">
+    <canvas id="previewCanvas"></canvas><br>
+
+    <!-- フィルタ選択 -->
+    <div id="filterOptions">
+      <div class="control-row">
+        <div class="filter-select">
+          <label>フィルタを選択:
+            <select id="filterSelect">
+              <option value="none">なし</option>
+              <option value="grayscale">グレースケール</option>
+              <option value="sepia">セピア</option>
+              <option value="invert">反転</option>
+            </select>
+          </label>
+        </div>
+        <div class="action-buttons">
+          <button id="applyFilterButton">フィルタ適用</button>
+          <label for="imageInput" class="file-label small-upload">
+            <img src="../photo/reload.png" alt="画像を再選択" style="height: 40px;" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ダウンロードボタン -->
+  <button id="downloadFiltered" style="display:none;">画像をダウンロード</button>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('navMenu');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function toggleMenu() {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+      hamburger.setAttribute('aria-expanded', !expanded);
+      hamburger.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    hamburger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+
+    const imageInput = document.getElementById('imageInput');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const ctx = previewCanvas.getContext('2d');
+    const inputArea = document.getElementById('inputArea');
+    const wrapperBox = document.querySelector('.wrapper-box');
+    const filterOptions = document.getElementById('filterOptions');
+    const filterSelect = document.getElementById('filterSelect');
+    const applyFilterButton = document.getElementById('applyFilterButton');
+    const downloadFiltered = document.getElementById('downloadFiltered');
+
+    let loadedImage = new Image();
+
+    function applyFilterToCanvas(filterType) {
+      ctx.drawImage(loadedImage, 0, 0);
+      const imageData = ctx.getImageData(0, 0, previewCanvas.width, previewCanvas.height);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i], g = data[i + 1], b = data[i + 2];
+        if (filterType === 'grayscale') {
+          const avg = (r + g + b) / 3;
+          data[i] = data[i + 1] = data[i + 2] = avg;
+        } else if (filterType === 'sepia') {
+          data[i] = Math.min(255, 0.393 * r + 0.769 * g + 0.189 * b);
+          data[i + 1] = Math.min(255, 0.349 * r + 0.686 * g + 0.168 * b);
+          data[i + 2] = Math.min(255, 0.272 * r + 0.534 * g + 0.131 * b);
+        } else if (filterType === 'invert') {
+          data[i] = 255 - r;
+          data[i + 1] = 255 - g;
+          data[i + 2] = 255 - b;
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    imageInput.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        loadedImage.onload = () => {
+          previewCanvas.width = loadedImage.width;
+          previewCanvas.height = loadedImage.height;
+          ctx.drawImage(loadedImage, 0, 0);
+
+          wrapperBox.style.display = 'block';
+          previewCanvas.style.display = 'block';
+          inputArea.style.display = 'none';
+          filterOptions.style.display = 'block';
+          downloadFiltered.style.display = 'inline-block';
+        };
+        loadedImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    applyFilterButton.addEventListener('click', function () {
+      const selectedFilter = filterSelect.value;
+      applyFilterToCanvas(selectedFilter);
+    });
+
+    downloadFiltered.addEventListener('click', function () {
+      const a = document.createElement('a');
+      a.href = previewCanvas.toDataURL();
+      a.download = "filtered_image.png";
+      a.click();
+    });
+  </script>
+
+</body>
+
+</html>

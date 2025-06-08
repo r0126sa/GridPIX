@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>画像分割ツール</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
+</head>
+
+<body>
+
+  <header>
+    <a href="../home.html">
+      <img src="../photo/icon.svg" alt="GridPIX" class="icon" />
+    </a>
+    <div id="hamburger" aria-label="メニューを開く" aria-expanded="false" role="button" tabindex="0">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav id="navMenu" aria-label="メインメニュー">
+      <button id="closeBtn" aria-label="メニューを閉じる">&times;</button>
+      <a href="#">画像分割</a>
+      <a href="../pages/select.html">複数範囲選択</a>
+      <a href="../pages/filter.html">フィルタ適用</a>
+    </nav>
+  </header>
+
+  <p class="title">画像分割ツール</p>
+
+  <!-- 画像選択エリア -->
+  <div class="inputBox" id="inputArea">
+    <label for="imageInput" class="file-label">
+      <img src="../photo/inputbutton.png" alt="画像を選択" />
+    </label>
+    <input type="file" id="imageInput" accept="image/*">
+    <p>1枚の画像を選択する.</p>
+  </div>
+
+  <!-- 最初は非表示にしておく -->
+  <div class="wrapper-box">
+    <!-- プレビュー用 Canvas -->
+    <canvas id="previewCanvas" style="display: none;"></canvas><br>
+
+    <!-- 分割数設定と分割・再アップロードボタン -->
+    <div id="splitOptions" style="display: none;">
+      <div class="control-row">
+        <div class="split-inputs">
+          <label>縦に分割: <input type="number" id="rows" value="2" min="1"></label>
+          <label>横に分割: <input type="number" id="cols" value="2" min="1"></label>
+        </div>
+        <div class="action-buttons">
+          <button id="splitButton">分割する</button>
+          <label for="imageInput" class="file-label small-upload">
+            <img src="../photo/reload.png" alt="画像を再選択" style="height: 40px;" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分割結果表示 -->
+  <div id="result"></div>
+
+  <!-- ZIPダウンロードボタン -->
+  <button id="downloadAll" style="display:none;">すべてまとめてダウンロード</button>
+
+
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('navMenu');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function toggleMenu() {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+      hamburger.setAttribute('aria-expanded', !expanded);
+      hamburger.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    hamburger.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMenu();
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+
+    const imageInput = document.getElementById('imageInput');
+    const splitButton = document.getElementById('splitButton');
+    const downloadAllButton = document.getElementById('downloadAll');
+    const resultDiv = document.getElementById('result');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const ctx = previewCanvas.getContext('2d');
+    const inputArea = document.getElementById('inputArea');
+    const splitOptions = document.getElementById('splitOptions');
+
+    let loadedImage = new Image();
+    let pieces = [];
+
+    function drawPreviewWithGrid(rows, cols) {
+      previewCanvas.width = loadedImage.width;
+      previewCanvas.height = loadedImage.height;
+
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      ctx.drawImage(loadedImage, 0, 0);
+
+      const pieceWidth = loadedImage.width / cols;
+      const pieceHeight = loadedImage.height / rows;
+
+      ctx.strokeStyle = '#FFCFCF';
+      ctx.lineWidth = 6;
+
+      // 縦線
+      for (let i = 1; i < cols; i++) {
+        const x = i * pieceWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, previewCanvas.height);
+        ctx.stroke();
+      }
+
+      // 横線
+      for (let j = 1; j < rows; j++) {
+        const y = j * pieceHeight;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(previewCanvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function updatePreview() {
+      const rows = parseInt(document.getElementById('rows').value);
+      const cols = parseInt(document.getElementById('cols').value);
+      drawPreviewWithGrid(rows, cols);
+    }
+
+    imageInput.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        loadedImage.onload = () => {
+          document.querySelector('.wrapper-box').style.display = 'block'; // ← 表示させる
+          previewCanvas.style.display = 'block';
+          inputArea.style.display = 'none';
+          splitOptions.style.display = 'block';
+          updatePreview();
+        };
+        loadedImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('rows').addEventListener('input', updatePreview);
+    document.getElementById('cols').addEventListener('input', updatePreview);
+
+    splitButton.addEventListener('click', function () {
+      const rows = parseInt(document.getElementById('rows').value);
+      const cols = parseInt(document.getElementById('cols').value);
+
+      if (!loadedImage.src) {
+        alert('まず画像をアップロードしてください！');
+        return;
+      }
+
+      resultDiv.innerHTML = '';
+      pieces = [];
+      downloadAllButton.style.display = 'none';
+
+      // スタイル設定（グリッドかつ横スクロール対応）
+      resultDiv.style.display = 'grid';
+      resultDiv.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+      resultDiv.style.gap = '10px';
+      resultDiv.style.overflowX = 'auto';
+      resultDiv.style.maxWidth = '100%';
+      resultDiv.style.margin = '20px auto';
+      resultDiv.style.padding = '10px';
+
+      const pieceWidth = loadedImage.width / cols;
+      const pieceHeight = loadedImage.height / rows;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const container = document.createElement('div');
+          container.className = 'piece-container';
+
+          const canvas = document.createElement('canvas');
+          canvas.width = pieceWidth;
+          canvas.height = pieceHeight;
+          const context = canvas.getContext('2d');
+
+          context.drawImage(
+            loadedImage,
+            col * pieceWidth, row * pieceHeight,
+            pieceWidth, pieceHeight,
+            0, 0,
+            pieceWidth, pieceHeight
+          );
+
+          container.appendChild(canvas);
+          resultDiv.appendChild(container);
+
+          pieces.push({
+            canvas: canvas,
+            filename: `piece_${row}_${col}.png`
+          });
+        }
+      }
+
+      downloadAllButton.style.display = 'inline-block';
+    });
+
+
+    downloadAllButton.addEventListener('click', function () {
+      const zip = new JSZip();
+
+      pieces.forEach(piece => {
+        zip.file(
+          piece.filename,
+          piece.canvas.toDataURL().split(',')[1],
+          { base64: true }
+        );
+      });
+
+      zip.generateAsync({ type: "blob" }).then(function (content) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = "split_images.zip";
+        a.click();
+      });
+    });
+  </script>
+
+</body>
+
+</html>

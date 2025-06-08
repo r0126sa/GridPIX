@@ -1,0 +1,397 @@
+body {
+    font-family: Tahoma, sans-serif;
+    text-align: center;
+    background-color: #F1FAFF;
+    color: #216386;
+    margin: 0;
+    padding-top: 18vh;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 16vh;
+    background-color: #BFDAE8;
+    padding: 0 1em;
+    z-index: 9999;
+}
+
+
+.title {
+    font-size: 42px;
+    padding: 2%;
+}
+
+/* ハンバーガーボタン */
+ #hamburger {
+     width: 30px;
+     height: 22px;
+     cursor: pointer;
+     position: relative;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-between;
+ }
+
+ #hamburger span {
+     display: block;
+     height: 4px;
+     background-color: #216386;
+     border-radius: 2px;
+     transition: 0.3s;
+ }
+
+ /* メニュー */
+ nav {
+     position: fixed;
+     top: 16vh;
+     right: 0;
+     width: 250px;
+     height: calc(100% - 16vh);
+     background-color: #BFDAE8;
+     box-shadow: -4px 0 8px rgba(0, 0, 0, 0.2);
+     transform: translateX(100%);
+     transition: transform 0.3s ease;
+     display: flex;
+     flex-direction: column;
+     padding-top: 40px;
+     box-sizing: border-box;
+     z-index: 9999;
+ }
+
+ nav.active {
+     transform: translateX(0);
+ }
+
+ nav a {
+     color: #216386;
+     text-decoration: none;
+     font-size: 1.3rem;
+     padding: 1em 2em;
+     border-bottom: 1px solid #216386;
+     transition: background-color 0.3s;
+ }
+
+ nav a:hover,
+ nav a:focus {
+     background-color: #a9c9e2;
+     outline: none;
+ }
+
+ /* 閉じるボタン */
+ #closeBtn {
+     position: absolute;
+     top: 10px;
+     right: 15px;
+     background: none;
+     border: none;
+     font-size: 30px;
+     color: #216386;
+     cursor: pointer;
+     line-height: 1;
+     padding: 0;
+     user-select: none;
+     z-index: 10000;
+ }
+
+ #closeBtn:hover,
+ #closeBtn:focus {
+     color: #12405a;
+     outline: none;
+ }
+
+ /* ハンバーガー変形アニメーション */
+ #hamburger.active span:nth-child(1) {
+     transform: translateY(9px) rotate(45deg);
+ }
+
+ #hamburger.active span:nth-child(2) {
+     opacity: 0;
+ }
+
+ #hamburger.active span:nth-child(3) {
+     transform: translateY(-9px) rotate(-45deg);
+ }
+
+ .title {
+     font-size: 42px;
+     padding: 4%;
+ }
+
+ .menu-group {
+     display: flex;
+     justify-content: center;
+     gap: 4%;
+ }
+
+.menu-group a.grid:hover img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-group a.select:hover img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-group a.filter:hover img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* レスポンシブ対応：幅768px以下では縦に並べる */
+@media screen and (max-width: 768px) {
+  .menu-group {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+  }
+}
+
+.inputBox {
+    margin: 0 auto;
+    width: 50%;
+    height: 40vh;
+    border: 4px dashed #BFDAE8;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#imageInput {
+    display: none;
+}
+
+.file-label {
+    cursor: pointer;
+    display: inline-block;
+}
+
+.icon {
+    height: 80px;
+}
+
+p {
+    padding-top: 2%;
+}
+
+/* 全体囲みボックス */
+.wrapper-box {
+    display: none;
+    /* 最初は非表示 */
+    background-color: #fbeaea;
+    border-radius: 20px;
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 70%;
+    margin-bottom: 4%;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    border-top: 2px dashed rgba(33, 99, 134, 0.5);
+    margin: 0 20px 0 20px;
+    padding-top: 20px;
+    /* 必要に応じて追加 */
+}
+
+.split-inputs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.split-inputs label {
+    display: flex;
+    align-items: center;
+    color: #216386;
+    font-size: 18px;
+    gap: 8px;
+}
+
+.split-inputs input[type="number"] {
+    width: 60px;
+    padding: 8px 10px;
+    font-size: 18px;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    background-color: #F1FAFF;
+    color: #216386;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#splitButton {
+    background-color: #216386;
+    color: #fbeaea;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#splitButton:hover {
+    transform: scale(1.05);
+}
+
+.file-label.small-upload {
+    cursor: pointer;
+    display: inline-block;
+    transform: scale(1.2);
+    transition: transform 0.2s ease;
+}
+
+.file-label:hover img {
+    transform: scale(1.05);
+}
+
+canvas {
+    border: 1px solid #ccc;
+}
+
+#previewCanvas {
+    max-width: 100%;
+    max-height: 600px;
+    display: block;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+}
+
+#downloadAll {
+    margin-top: 2%;
+}
+
+#result {
+    display: grid;
+    justify-content: center;
+    gap: 10px;
+    overflow-x: auto;
+    max-width: 80%;
+    margin: 0px auto;
+    padding: 10px;
+}
+
+.piece-container canvas {
+    max-width: 200px;
+    /* 表示上の最大幅 */
+    height: auto;
+    /* アスペクト比を保持 */
+}
+
+#downloadAll {
+    background-color: #216386;
+    color: #fbeaea;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 4%;
+}
+
+#downloadAll:hover {
+    transform: scale(1.05);
+}
+
+#clearSelections {
+    background-color: #216386;
+    color: #fbeaea;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#clearSelections:hover {
+    transform: scale(1.05);
+}
+
+.normal {
+    padding: 0%;
+}
+
+.action-buttons2 {
+    margin-top: 3%;
+    display: flex;
+    justify-content: center;
+    /* 中央揃え */
+    align-items: center;
+    gap: 20px;
+    /* ボタン間のスペース */
+    margin-top: 20px;
+}
+
+#applyFilterButton {
+    background-color: #216386;
+    color: #fbeaea;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#applyFilterButton:hover {
+    transform: scale(1.05);
+}
+
+#filterSelect {
+    width: 200px;
+    padding: 8px 10px;
+    font-size: 18px;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    background-color: #F1FAFF;
+    color: #216386;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23216386" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+#downloadFiltered {
+    margin-bottom: 4%;
+    background-color: #216386;
+    color: #fbeaea;
+    border: 1px solid #216386;
+    border-radius: 12px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#downloadFiltered:hover {
+    transform: scale(1.05);
+}
